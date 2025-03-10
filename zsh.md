@@ -1,43 +1,33 @@
 [[_TOC_]]
 
-## ZSH configurado para kubectl
+# Kubernetes en la terminal: optimizando mi día a día con ZSH
 
-Para reinstalar **Oh My Zsh**, **Powerlevel10k**, y los plugins más usados, sigue estos pasos:
+Como administrador de distintos clusters de kubernetes y amante de la terminal, decidí optimizar mi flujo diario de trabajo. Para ello personalicé mi entorno con `zsh`, complementándolo con plugins y herramientas que me ayudan a trabajar más rápido y con menos fricción.
 
----
+Les comparto mi un set-up inicial de la terminal `zsh` que te permite trabajar cómodo en la terminal y sin la necesidad de aplicaciones gráficas.
 
-### **1. Instalar Zsh** (si lo desinstalaste antes)
-- **Debian/Ubuntu**:
-  ```sh
-  sudo apt update && sudo apt install zsh -y
-  ```
-- **Arch Linux**:
-  ```sh
-  sudo pacman -S zsh
-  ```
-- **macOS (Homebrew)**:
-  ```sh
-  brew install zsh
-  ```
+Mi entorno (puede replicarse en cualquier otro SO)
+> UBUNTU 24.04
 
-Una vez instalado, cambia la shell predeterminada a Zsh:
+## **1. Instalar Zsh**
+```sh
+sudo apt update && sudo apt install zsh -y
+```
+
+Una vez instalado, cambia la shell predeterminada a `zsh`:
 ```sh
 chsh -s $(which zsh)
 ```
 Luego, cierra sesión y vuelve a ingresar o ejecuta `zsh`.
 
----
-
-### **2. Instalar Oh My Zsh**
+## **2. Instalar Oh My Zsh**
 ```sh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 ```
 
 Esto instalará Oh My Zsh en `~/.oh-my-zsh` y creará un archivo `~/.zshrc`.
 
----
-
-### **3. Instalar Powerlevel10k**
+## **3. Instalar Powerlevel10k**
 ```sh
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 ```
@@ -53,7 +43,7 @@ Sigue el asistente de Powerlevel10k para configurarlo.
 
 ---
 
-### **4. Instalar Plugins útiles**
+## **4. Instalar Plugins útiles**
 Ejecuta:
 
 ```sh
@@ -62,10 +52,10 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-completions
 ```
 
-Ahora edita `~/.zshrc` y cambia la los plugins por:
+Ahora edita `~/.zshrc`, busca la variable `plugins` y agrega:
 
 ```sh
-plugins=(git z zsh-autosuggestions zsh-syntax-highlighting zsh-completions)
+plugins=(kubectl git z zsh-autosuggestions zsh-syntax-highlighting zsh-completions)
 ```
 ---
 **1️⃣ `git`**  
@@ -104,9 +94,23 @@ Guarda y recarga la configuración:
 source ~/.zshrc
 ```
 
+## **5. Cambiar la shell predeterminada**
+
+Para hacer zsh tu shell por defecto, usa:
+
+```bash
+chsh -s $(which zsh)
+```
+🔹 Esto cambiará la shell de tu usuario. Para que surta efecto, cierra sesión y vuelve a iniciar.
+
+```bash
+echo $SHELL
+```
+Si ves `/bin/zsh` o `/usr/bin/zsh`, ya está configurado correctamente.
+
 ---
 
-### **5. (Opcional) Instalar fuentes Nerd Fonts para iconos en Powerlevel10k**
+## **6. (Opcional) Instalar fuentes Nerd Fonts para iconos en Powerlevel10k**
 Si usas Powerlevel10k con iconos, instala las fuentes Nerd Fonts:
 
 - **Debian/Ubuntu**:
@@ -165,7 +169,7 @@ font:
 
 ---
 
-## **3. Verificar que los iconos y ligaduras funcionan**
+### **3. Verificar que los iconos y ligaduras funcionan**
 Ejecuta:
 
 ```sh
@@ -173,3 +177,167 @@ echo "  λ →"
 ```
 
 Si ves los caracteres correctamente, la configuración está lista. 
+
+# `kubectl`
+
+## **1. Instalar kubectl**
+
+Actualice el índice de paquetes de apt e instale los paquetes necesarios para usar Kubernetes con el repositorio apt:
+```bash
+sudo apt-get update
+sudo apt-get install -y apt-transport-https ca-certificates curl
+```
+
+Descargue la clave de firma pública de Google Cloud:
+```bash
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+```
+
+Agregue el repositorio de Kubernetes a apt:
+```bash
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+```
+ 
+Actualice el índice de paquetes de apt con el nuevo repositorio e instale kubectl:
+```bash
+sudo apt-get update
+sudo apt-get install -y kubectl
+```
+
+## **2. Instalar krew**
+
+Instalar
+```bash
+(
+  set -x; cd "$(mktemp -d)" &&
+  OS="$(uname | tr '[:upper:]' '[:lower:]')" &&
+  ARCH="$(uname -m | sed -e 's/x86_64/amd64/' -e 's/arm.*$/arm/')" &&
+  KREW="krew-${OS}_${ARCH}" &&
+  curl -fsSLO "https://github.com/kubernetes-sigs/krew/releases/latest/download/${KREW}.tar.gz" &&
+  tar zxvf "${KREW}.tar.gz" &&
+  ./"${KREW}" install krew
+)
+```
+
+Agregarlo a al PATH
+```bash
+echo 'export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+Instalar plugins con krew
+```bash
+kubectl krew install ns       # Alternativa a kubens
+kubectl krew install ctx      # Alternativa a kubectx
+kubectl krew install get-all  # Lista todos los recursos del cluster (usar con -n NS)
+```
+
+## **3. Activar autocompletado avanzado para `kubectl`**
+Ejecuta este comando para generar el autocompletado de `kubectl`:  
+```sh
+kubectl completion zsh > ~/.kubectl-completion.sh
+```
+Ahora agrega esta línea a tu `.zshrc`:  
+```sh
+source ~/.kubectl-completion.sh
+```
+Y recarga la configuración:  
+```sh
+source ~/.zshrc
+```
+
+Esto habilita el autocompletado automático al escribir `kubectl`, sugiriendo nombres de recursos, namespaces, etc.
+
+---
+
+## **4. Instalar `kubectx` y `kubens` para cambiar de contexto rápido**
+Si manejas múltiples clusters o namespaces, estos comandos te ahorrarán tiempo.
+
+### **🔹 Instalación**
+- **Debian/Ubuntu**:
+  ```sh
+  sudo apt install kubectx
+  ```
+- **Arch Linux**:
+  ```sh
+  sudo pacman -S kubectx
+  ```
+- **macOS (Homebrew)**:
+  ```sh
+  brew install kubectx
+  ```
+
+# **🔹 Alias útiles (agregar en `.zshrc`)**  
+
+### **1️⃣ Monitorear Pods en tiempo real**
+```sh
+alias wkgp='watch -n 1 kubectl get pods -o wide'
+```
+
+---
+
+### **2️⃣ Monitorear PVC en tiempor real**
+```sh
+alias wkgpvc='watch -n 1 kubectl get pvc'
+```
+
+---
+
+### **3️⃣ Listar Pods con errores en todo el cluster**
+> Lo ideal es que la lista esté vacía ;)
+```sh
+alias kgerror="kubectl get pods -A -o wide | grep -vi complete | grep -vi running"
+```
+
+---
+
+### **4️⃣ Alias para kubectx y kubens**
+```bash
+alias kctx="kubectx"
+alias kns="kubens"
+```
+---
+
+### **5️⃣ Kubecolor**
+
+Primero, instalarlo
+```bash
+curl -L https://github.com/dty1er/kubecolor/releases/latest/download/kubecolor-linux-amd64 -o /usr/local/bin/kubecolor
+chmod +x /usr/local/bin/kubecolor
+```
+
+Alias:
+```bash
+alias kubectl="kubecolor"
+```
+
+---
+
+### **6️⃣ Codificar un secreto en BASE64**
+```sh
+# Codificar en base64 con entrada interactiva
+function b64enc() {
+  echo -n "Texto a codificar: "
+  read input
+  echo -n "$input" | base64 -w 0  # En macOS usa `base64` sin `-w 0`
+  echo
+}
+```
+
+---
+
+### **7️⃣ Decodificar un secreto en BASE64**
+```sh
+# Decodificar en base64 con entrada interactiva
+function b64dec() {
+  echo -n "Texto en base64: "
+  read input
+  echo "$input" | base64 -d  # En macOS usa `base64 -D`
+  echo
+}
+```
+
+### Aplicar cambios
+```bash
+source ~/.zshrc
+```
