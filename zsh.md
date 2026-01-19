@@ -55,7 +55,7 @@ git clone https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-~/.oh-my-zs
 Ahora edita `~/.zshrc`, busca la variable `plugins` y agrega:
 
 ```sh
-plugins=(kubectl git z zsh-autosuggestions zsh-syntax-highlighting zsh-completions)
+plugins=(kubectl git z zsh-autosuggestions zsh-syntax-highlighting zsh-completions fzf)
 ```
 ---
 **1️⃣ `git`**  
@@ -87,6 +87,15 @@ Resalta la sintaxis de los comandos mientras los escribes.
 Extiende el autocompletado de comandos en `zsh`.  
 **Ejemplo**:  
 - Completa comandos adicionales como `git` o `docker` con más opciones.
+
+---
+
+**6 `fzf` para lista seleccionable**
+
+```bash
+sudo apt install fzf                                                                         
+```
+
 
 Guarda y recarga la configuración:
 
@@ -230,6 +239,8 @@ Instalar plugins con krew
 kubectl krew install ns       # Alternativa a kubens
 kubectl krew install ctx      # Alternativa a kubectx
 kubectl krew install get-all  # Lista todos los recursos del cluster (usar con -n NS)
+kubectl krew install stern
+kubectl krew install tree
 ```
 
 ## **3. Activar autocompletado avanzado para `kubectl`**
