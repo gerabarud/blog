@@ -1,6 +1,6 @@
-## 1. Instalación de Paquetes y Dependencias
+### Paso 1: Instalación de Paquetes y Dependencias
 
-Ejecuta el siguiente comando en la terminal para instalar Sway, el emulador de terminal, el lanzador, las utilidades del portapapeles, los componentes de red y las tipografías de emojis:
+Ejecuta el siguiente comando en la terminal para instalar el entorno Sway completo, utilidades de red, herramientas del portapapeles y fuentes para emojis:
 
 ```bash
 sudo apt update && sudo apt install -y \
@@ -19,9 +19,9 @@ sudo apt update && sudo apt install -y \
 
 ---
 
-## 2. Creación de la Estructura de Directorios
+### Paso 2: Creación de la Estructura de Directorios
 
-Crea las carpetas de configuración necesarias en tu directorio personal:
+Crea los directorios necesarios en tu carpeta personal:
 
 ```bash
 mkdir -p ~/.config/sway ~/.config/foot
@@ -30,9 +30,9 @@ mkdir -p ~/.config/sway ~/.config/foot
 
 ---
 
-## 3. Archivo Principales de Configuración
+### Paso 3: Archivos de Configuración del Sistema
 
-### Configuración de Sway (`~/.config/sway/config`)
+#### 1. Archivo Principal de Sway (`~/.config/sway/config`)
 
 Crea o edita el archivo:
 
@@ -41,7 +41,7 @@ nano ~/.config/sway/config
 
 ```
 
-Pega la configuración completa:
+Pega la configuración completa actualizándote los atajos de energía y red:
 
 ```swayconfig
 ### Variables
@@ -218,13 +218,15 @@ bindsym $mod+Control+Left focus output left
 bindsym $mod+Shift+v exec cliphist list | wofi --dmenu --prompt "Historial..." | cliphist decode | wl-copy
 bindsym $mod+t layout toggle stacking split
 
+# Gestor de Red y VPN
 bindsym $mod+n exec nm-connection-editor
 for_window [app_id="nm-connection-editor"] floating enable
 
 bindsym $mod+Shift+n exec foot --title="Gestor de Red" nmtui
 for_window [title="Gestor de Red"] floating enable
 
-bindsym $mod+Shift+e exec echo -e "1. 🚪 Cerrar Sesión\n2. 🔄 Reiniciar\n3. ⚡ Apagar" | wofi --dmenu --prompt "Sistema" | awk '{print $2}' | xargs -I {} bash -c 'if [ "{}" = "Cerrar" ]; then swaymsg exit; elif [ "{}" = "Reiniciar" ]; then systemctl reboot; elif [ "{}" = "Apagar" ]; then systemctl poweroff; fi'
+# Menú de Apagado / Reinicio / Suspender / Cerrar Sesión
+bindsym $mod+Shift+e exec ~/.config/sway/power-menu.sh
 
 # =============================================================================
 # 6. AUTOSTART Y SERVICIOS
@@ -245,16 +247,16 @@ workspace $ws1
 
 ---
 
-### Script de la Barra Superior (`~/.config/sway/status.sh`)
+#### 2. Script de la Barra Superior (`~/.config/sway/status.sh`)
 
-Crea el archivo ejecutable:
+Crea el archivo:
 
 ```bash
 nano ~/.config/sway/status.sh
 
 ```
 
-Pega el código de monitoreo:
+Pega el código con consulta en segundo plano a Open-Meteo:
 
 ```bash
 #!/bin/bash
@@ -337,7 +339,7 @@ done
 
 ```
 
-Otorga permisos de ejecución al script:
+Otorga permisos de ejecución:
 
 ```bash
 chmod +x ~/.config/sway/status.sh
@@ -346,7 +348,49 @@ chmod +x ~/.config/sway/status.sh
 
 ---
 
-### Configuración de la Terminal Foot (`~/.config/foot/foot.ini`)
+#### 3. Script del Menú de Apagado (`~/.config/sway/power-menu.sh`)
+
+Crea el archivo:
+
+```bash
+nano ~/.config/sway/power-menu.sh
+
+```
+
+Pega el selector de energía con Wofi:
+
+```bash
+#!/bin/bash
+
+OPCION=$(echo -e "1. 🚪 Cerrar Sesión\n2. 🔄 Reiniciar\n3. ⚡ Apagar\n4. 🌙 Suspender" | wofi --dmenu --prompt "Sistema")
+
+case "$OPCION" in
+    *Cerrar*)
+        swaymsg exit
+        ;;
+    *Reiniciar*)
+        systemctl reboot
+        ;;
+    *Apagar*)
+        systemctl poweroff
+        ;;
+    *Suspender*)
+        systemctl suspend
+        ;;
+esac
+
+```
+
+Otorga permisos de ejecución:
+
+```bash
+chmod +x ~/.config/sway/power-menu.sh
+
+```
+
+---
+
+#### 4. Configuración de Foot (`~/.config/foot/foot.ini`)
 
 Crea o edita el archivo:
 
@@ -366,9 +410,9 @@ font=monospace:size=14
 
 ---
 
-## 4. Establecer Firefox como Navegador Predeterminado
+### Paso 4: Definir Firefox como Navegador Predeterminado
 
-Ejecuta los siguientes comandos para asegurarte de que Firefox sea el navegador predeterminado en el entorno de escritorio:
+Ejecuta los siguientes comandos para enlazar Firefox como navegador por defecto en la sesión Wayland:
 
 ```bash
 xdg-settings set default-web-browser firefox.desktop
@@ -381,7 +425,7 @@ sudo update-alternatives --config x-www-browser
 
 ---
 
-## 5. Tabla Resumen de Atajos de Teclado Principales
+### Paso 5: Resumen de Atajos de Teclado Principales
 
 | Combinación de Teclas | Acción / Función |
 | --- | --- |
@@ -389,9 +433,9 @@ sudo update-alternatives --config x-www-browser
 | **`Super` + `D**` | Abre el lanzador de aplicaciones `wofi`. |
 | **`Super` + `Shift` + `Q**` | Cierra la ventana activa. |
 | **`Super` + `T**` | Alterna el contenedor actual entre **Mosaico (Split)** y **Pestañas Verticales (Stacking)**. |
-| **`Super` + `N**` | Abre el gestor gráfico de Redes y VPNs (`nm-connection-editor`) flotante. |
+| **`Super` + `N**` | Abre el gestor gráfico de Redes y VPNs (`nm-connection-editor`) en modo flotante. |
 | **`Super` + `Shift` + `N**` | Abre el menú interactivo de red `nmtui` en una terminal flotante. |
 | **`Super` + `Shift` + `V**` | Despliega el menú del historial del portapapeles (`cliphist` + `wofi`). |
-| **`Super` + `Shift` + `E**` | Abre el menú interactivo de apagado, reinicio y cierre de sesión. |
-| **`Super` + `Ctrl` + `Flechas**` | Cambia el foco de pantalla (Monitor izquierdo/derecho). |
+| **`Super` + `Shift` + `E**` | Despliega el menú gráfico para **Cerrar Sesión, Reiniciar, Apagar o Suspender**. |
+| **`Super` + `Ctrl` + `Flechas**` | Cambia el foco entre monitores. |
 | **`Super` + `Ctrl` + `Shift` + `Flechas**` | Mueve el **Workspace completo** al otro monitor. |
