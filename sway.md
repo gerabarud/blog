@@ -1,15 +1,24 @@
-### Paso 1: Instalación de Paquetes y Dependencias
+## Paso 1: Instalación Completa de Paquetes y Dependencias
 
-Ejecuta el siguiente comando en la terminal para instalar el entorno Sway completo, utilidades de red, herramientas del portapapeles y fuentes para emojis:
+Ejecuta este comando unificado para instalar Sway, las utilidades multimedia, captura de pantalla, bloqueo de sesión, gestor de archivos y fuentes necesarias:
 
 ```bash
 sudo apt update && sudo apt install -y \
     sway \
+    swaylock \
     foot \
     wofi \
     wl-clipboard \
     cliphist \
     network-manager-gnome \
+    playerctl \
+    pulseaudio-utils \
+    gnome-calculator \
+    brightnessctl \
+    grim \
+    slurp \
+    libnotify-bin \
+    nautilus \
     python3 \
     curl \
     fonts-noto-color-emoji \
@@ -19,9 +28,9 @@ sudo apt update && sudo apt install -y \
 
 ---
 
-### Paso 2: Creación de la Estructura de Directorios
+## Paso 2: Creación de la Estructura de Directorios
 
-Crea los directorios necesarios en tu carpeta personal:
+Crea las carpetas de configuración en tu directorio personal:
 
 ```bash
 mkdir -p ~/.config/sway ~/.config/foot
@@ -30,18 +39,13 @@ mkdir -p ~/.config/sway ~/.config/foot
 
 ---
 
-### Paso 3: Archivos de Configuración del Sistema
+## Paso 3: Archivos de Configuración del Sistema
 
-#### 1. Archivo Principal de Sway (`~/.config/sway/config`)
+### 1. Archivo Principal de Sway (`~/.config/sway/config`)
 
-Crea o edita el archivo:
 
-```bash
-nano ~/.config/sway/config
 
-```
-
-Pega la configuración completa actualizándote los atajos de energía y red:
+Crea o edita el archivo `~/.config/sway/config` con todas las reglas de monitores, asignación de espacios de trabajo, teclas multimedia, reglas para Picture-in-Picture, capturas de pantalla y autostart:
 
 ```swayconfig
 ### Variables
@@ -150,7 +154,7 @@ bindsym $mod+r mode "resize"
 set $ws1 "1: Browsers"
 set $ws2 "2: Terminales"
 set $ws3 "3: VSCode"
-set $ws4 "4: Extras"
+set $ws4 "4: Archivos"
 
 # =============================================================================
 # 2. BARRAS DE ESTADO
@@ -207,6 +211,11 @@ assign [class="Code"] $ws3
 for_window [class="code_code"] layout stacking
 for_window [class="Code"] layout stacking
 
+# Gestor de Archivos -> Workspace 4
+assign [app_id="org.gnome.Nautilus"] $ws4
+assign [class="Nautilus"] $ws4
+assign [app_id="thunar"] $ws4
+
 # =============================================================================
 # 5. ATAJOS DE TECLADO PERSONALIZADOS
 # =============================================================================
@@ -228,6 +237,9 @@ for_window [title="Gestor de Red"] floating enable
 # Menú de Apagado / Reinicio / Suspender / Cerrar Sesión
 bindsym $mod+Shift+e exec ~/.config/sway/power-menu.sh
 
+# Bloquear pantalla directamente
+bindsym $mod+Control+l exec swaylock -f -c 000000
+
 # =============================================================================
 # 6. AUTOSTART Y SERVICIOS
 # =============================================================================
@@ -240,23 +252,56 @@ exec nm-applet --indicator
 exec firefox
 exec foot
 exec code
+exec nautilus
 
 workspace $ws1
+
+# =============================================================================
+# 7. TECLAS MULTIMEDIA Y TECLAS ESPECIALES (XF86)
+# =============================================================================
+# Control de Volumen
+bindsym --locked XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym --locked XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym --locked XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym --locked XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
+
+# Control de Reproducción (Spotify, YouTube, Firefox, etc.)
+bindsym --locked XF86AudioPlay exec playerctl play-pause
+bindsym --locked XF86AudioNext exec playerctl next
+bindsym --locked XF86AudioPrev exec playerctl previous
+
+# Calculadora (se abre en modo flotante)
+bindsym XF86Calculator exec gnome-calculator
+for_window [app_id="org.gnome.Calculator"] floating enable
+for_window [class="Gnome-calculator"] floating enable
+
+# Brillo de pantalla (Laptops)
+bindsym --locked XF86MonBrightnessUp exec brightnessctl set +5%
+bindsym --locked XF86MonBrightnessDown exec brightnessctl set 5%-
+
+# =============================================================================
+# 8. REGLAS PARA PICTURE-IN-PICTURE (FLOTANTE + ADHESIVO)
+# =============================================================================
+for_window [title="(?i)picture-in-picture"] floating enable, sticky enable, resize set 640px 360px
+for_window [title="Imagen en imagen"] floating enable, sticky enable, resize set 640px 360px
+for_window [app_id="firefox" title="Picture-in-Picture"] floating enable, sticky enable, resize set 640px 360px
+
+# =============================================================================
+# 9. CAPTURAS DE PANTALLA (GRIM + SLURP)
+# =============================================================================
+bindsym Print exec grim - | wl-copy && notify-send "Captura de Pantalla" "Pantalla completa copiada al portapapeles"
+bindsym Shift+Print exec grim -g "$(slurp)" - | wl-copy && notify-send "Captura de Pantalla" "Área copiada al portapapeles"
+bindsym $mod+Print exec grim ~/Imágenes/captura_$(date +'%Y%m%d_%H%M%S').png && notify-send "Captura Guardada" "Guardada en ~/Imágenes"
 
 ```
 
 ---
 
-#### 2. Script de la Barra Superior (`~/.config/sway/status.sh`)
+### 2. Script de la Barra Superior (`~/.config/sway/status.sh`)
 
-Crea el archivo:
 
-```bash
-nano ~/.config/sway/status.sh
 
-```
-
-Pega el código con consulta en segundo plano a Open-Meteo:
+Crea el archivo `~/.config/sway/status.sh` para obtener información del sistema y clima:
 
 ```bash
 #!/bin/bash
@@ -281,7 +326,7 @@ try:
         45: "🌫️", 48: "🌫️",
         51: "🌧️", 53: "🌧️", 55: "🌧️", 61: "🌧️", 63: "🌧️", 65: "🌧️",
         80: "🌦️", 81: "🌦️", 82: "🌧️",
-        95: "⛈️", 96: "⛈️", 99: "⛈️"
+        95: "⛈️️", 96: "⛈️", 99: "⛈️"
     }
     icon = codes.get(code, "🌡️")
     print(f"{icon} {temp}°C")
@@ -348,23 +393,21 @@ chmod +x ~/.config/sway/status.sh
 
 ---
 
-#### 3. Script del Menú de Apagado (`~/.config/sway/power-menu.sh`)
+### 3. Script del Menú de Apagado y Sistema (`~/.config/sway/power-menu.sh`)
 
-Crea el archivo:
 
-```bash
-nano ~/.config/sway/power-menu.sh
 
-```
-
-Pega el selector de energía con Wofi:
+Crea el archivo `~/.config/sway/power-menu.sh` para incluir las funciones de bloqueo, suspensión y apagado:
 
 ```bash
 #!/bin/bash
 
-OPCION=$(echo -e "1. 🚪 Cerrar Sesión\n2. 🔄 Reiniciar\n3. ⚡ Apagar\n4. 🌙 Suspender" | wofi --dmenu --prompt "Sistema")
+OPCION=$(echo -e "1. 🔒 Bloquear Pantalla\n2. 🚪 Cerrar Sesión\n3. 🔄 Reiniciar\n4. ⚡ Apagar\n5. 🌙 Suspender" | wofi --dmenu --prompt "Sistema")
 
 case "$OPCION" in
+    *Bloquear*)
+        swaylock -f -c 000000
+        ;;
     *Cerrar*)
         swaymsg exit
         ;;
@@ -390,16 +433,9 @@ chmod +x ~/.config/sway/power-menu.sh
 
 ---
 
-#### 4. Configuración de Foot (`~/.config/foot/foot.ini`)
+### 4. Configuración de Foot (`~/.config/foot/foot.ini`)
 
-Crea o edita el archivo:
-
-```bash
-nano ~/.config/foot/foot.ini
-
-```
-
-Pega el contenido:
+Crea o edita `~/.config/foot/foot.ini`:
 
 ```ini
 [main]
@@ -410,9 +446,9 @@ font=monospace:size=14
 
 ---
 
-### Paso 4: Definir Firefox como Navegador Predeterminado
+## Paso 4: Definir Navegador Predeterminado
 
-Ejecuta los siguientes comandos para enlazar Firefox como navegador por defecto en la sesión Wayland:
+Ejecuta los siguientes comandos para enlazar Firefox como navegador predeterminado en el sistema:
 
 ```bash
 xdg-settings set default-web-browser firefox.desktop
@@ -425,17 +461,48 @@ sudo update-alternatives --config x-www-browser
 
 ---
 
-### Paso 5: Resumen de Atajos de Teclado Principales
+## Paso 5: Resumen de Atajos de Teclado Actualizado
+
+
 
 | Combinación de Teclas | Acción / Función |
 | --- | --- |
 | **`Super` + `Enter**` | Abre la terminal `foot`. |
 | **`Super` + `D**` | Abre el lanzador de aplicaciones `wofi`. |
 | **`Super` + `Shift` + `Q**` | Cierra la ventana activa. |
-| **`Super` + `T**` | Alterna el contenedor actual entre **Mosaico (Split)** y **Pestañas Verticales (Stacking)**. |
-| **`Super` + `N**` | Abre el gestor gráfico de Redes y VPNs (`nm-connection-editor`) en modo flotante. |
-| **`Super` + `Shift` + `N**` | Abre el menú interactivo de red `nmtui` en una terminal flotante. |
-| **`Super` + `Shift` + `V**` | Despliega el menú del historial del portapapeles (`cliphist` + `wofi`). |
-| **`Super` + `Shift` + `E**` | Despliega el menú gráfico para **Cerrar Sesión, Reiniciar, Apagar o Suspender**. |
-| **`Super` + `Ctrl` + `Flechas**` | Cambia el foco entre monitores. |
-| **`Super` + `Ctrl` + `Shift` + `Flechas**` | Mueve el **Workspace completo** al otro monitor. |
+| **`Super` + `T**` | Alterna la disposición entre **Mosaico (Split)** y **Pestañas Verticales (Stacking)**.
+
+ |
+| **`Super` + `E**` | Alterna la división de la ventana actual (`toggle split`).
+
+ |
+| **`Super` + `N**` | Abre el gestor gráfico de redes y VPN (`nm-connection-editor`) flotante.
+
+ |
+| **`Super` + `Shift` + `N**` | Abre la interfaz de red interactiva `nmtui` en una terminal flotante.
+
+ |
+| **`Super` + `Shift` + `V**` | Abre el menú del historial del portapapeles (`cliphist` + `wofi`).
+
+ |
+| **`Super` + `Shift` + `E**` | Despliega el menú del sistema (Bloquear, Cerrar Sesión, Reiniciar, Apagar, Suspender).
+
+ |
+| **`Super` + `Control` + `L**` | Bloquea la pantalla inmediatamente con `swaylock`.
+
+ |
+| **`Print Screen`** | Toma captura de pantalla completa y la copia al portapapeles.
+
+ |
+| **`Shift` + `Print Screen**` | Permite seleccionar un área con el ratón y copiar la captura al portapapeles.
+
+ |
+| **`Super` + `Print Screen**` | Guarda la captura de pantalla completa como archivo dentro de `~/Imágenes/`.
+
+ |
+| **`Teclas XF86 (Volumen/Brillo/Media)`** | Controla el volumen, el brillo de pantalla y la reproducción multimedia global.
+
+ |
+| **`Super` + `R**` | Entra al modo de redimensionar ventanas (*Resize*).
+
+ |
