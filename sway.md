@@ -470,39 +470,15 @@ sudo update-alternatives --config x-www-browser
 | **`Super` + `Enter**` | Abre la terminal `foot`. |
 | **`Super` + `D**` | Abre el lanzador de aplicaciones `wofi`. |
 | **`Super` + `Shift` + `Q**` | Cierra la ventana activa. |
-| **`Super` + `T**` | Alterna la disposición entre **Mosaico (Split)** y **Pestañas Verticales (Stacking)**.
-
- |
-| **`Super` + `E**` | Alterna la división de la ventana actual (`toggle split`).
-
- |
-| **`Super` + `N**` | Abre el gestor gráfico de redes y VPN (`nm-connection-editor`) flotante.
-
- |
-| **`Super` + `Shift` + `N**` | Abre la interfaz de red interactiva `nmtui` en una terminal flotante.
-
- |
-| **`Super` + `Shift` + `V**` | Abre el menú del historial del portapapeles (`cliphist` + `wofi`).
-
- |
-| **`Super` + `Shift` + `E**` | Despliega el menú del sistema (Bloquear, Cerrar Sesión, Reiniciar, Apagar, Suspender).
-
- |
-| **`Super` + `Control` + `L**` | Bloquea la pantalla inmediatamente con `swaylock`.
-
- |
-| **`Print Screen`** | Toma captura de pantalla completa y la copia al portapapeles.
-
- |
-| **`Shift` + `Print Screen**` | Permite seleccionar un área con el ratón y copiar la captura al portapapeles.
-
- |
-| **`Super` + `Print Screen**` | Guarda la captura de pantalla completa como archivo dentro de `~/Imágenes/`.
-
- |
-| **`Teclas XF86 (Volumen/Brillo/Media)`** | Controla el volumen, el brillo de pantalla y la reproducción multimedia global.
-
- |
-| **`Super` + `R**` | Entra al modo de redimensionar ventanas (*Resize*).
-
- |
+| **`Super` + `T**` | Alterna la disposición entre **Mosaico (Split)** y **Pestañas Verticales (Stacking)**. |
+| **`Super` + `E**` | Alterna la división de la ventana actual (`toggle split`). |
+| **`Super` + `N**` | Abre el gestor gráfico de redes y VPN (`nm-connection-editor`) flotante. |
+| **`Super` + `Shift` + `N**` | Abre la interfaz de red interactiva `nmtui` en una terminal flotante. |
+| **`Super` + `Shift` + `V**` | Abre el menú del historial del portapapeles (`cliphist` + `wofi`). |
+| **`Super` + `Shift` + `E**` | Despliega el menú del sistema (Bloquear, Cerrar Sesión, Reiniciar, Apagar, Suspender). |
+| **`Super` + `Control` + `L**` | Bloquea la pantalla inmediatamente con `swaylock`. |
+| **`Print Screen`** | Toma captura de pantalla completa y la copia al portapapeles. |
+| **`Shift` + `Print Screen**` | Permite seleccionar un área con el ratón y copiar la captura al portapapeles. |
+| **`Super` + `Print Screen**` | Guarda la captura de pantalla completa como archivo dentro de `~/Imágenes/`. |
+| **`Teclas XF86 (Volumen/Brillo/Media)`** | Controla el volumen, el brillo de pantalla y la reproducción multimedia global. |
+| **`Super` + `R**` | Entra al modo de redimensionar ventanas (*Resize*). |
