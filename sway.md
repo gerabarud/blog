@@ -22,7 +22,8 @@ sudo apt update && sudo apt install -y \
     python3 \
     curl \
     fonts-noto-color-emoji \
-    fonts-font-awesome
+    fonts-font-awesome \
+    mako-notifier
 
 ```
 
@@ -253,6 +254,10 @@ exec firefox
 exec foot
 exec code
 exec nautilus
+exec mako
+
+exec systemctl --user set-environment BROWSER=firefox
+exec dbus-update-activation-environment --systemd BROWSER=firefox
 
 workspace $ws1
 
@@ -455,7 +460,9 @@ xdg-settings set default-web-browser firefox.desktop
 xdg-mime default firefox.desktop x-scheme-handler/http
 xdg-mime default firefox.desktop x-scheme-handler/https
 xdg-mime default firefox.desktop text/html
-sudo update-alternatives --config x-www-browser
+sudo update-alternatives --set x-www-browser /usr/bin/firefox
+echo 'export BROWSER=firefox' >> ~/.zshrc
+source ~/.zshrc
 
 ```
 
